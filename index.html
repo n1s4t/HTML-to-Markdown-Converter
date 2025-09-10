@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instant HTML to Markdown Converter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        textarea {
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            resize: none;
+        }
+        .custom-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white">Instant HTML to Markdown Converter</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-400 mt-2">Paste your HTML in the left panel, and get clean Markdown on the right.</p>
+        </header>
+
+        <!-- Main Converter Section -->
+        <main class="bg-white dark:bg-gray-800 rounded-2xl custom-shadow overflow-hidden">
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap justify-center items-center p-4 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700 space-x-2 md:space-x-4">
+                <button id="convertBtn" class="btn bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-5 rounded-lg focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:focus:ring-indigo-800">
+                    <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    Convert
+                </button>
+                <button id="copyBtn" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-5 rounded-lg focus:outline-none focus:ring-4 focus:ring-green-300 dark:focus:ring-green-800">
+                    <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                    Copy Markdown
+                </button>
+                <button id="clearBtn" class="btn bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-5 rounded-lg focus:outline-none focus:ring-4 focus:ring-red-300 dark:focus:ring-red-800">
+                     <svg class="w-5 h-5 inline-block mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
+                    Clear
+                </button>
+            </div>
+            
+            <!-- Editor Panels -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-px bg-gray-200 dark:bg-gray-700">
+                <!-- HTML Input -->
+                <div class="bg-white dark:bg-gray-800 p-2">
+                     <label for="htmlInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 pl-2">HTML Input</label>
+                    <textarea id="htmlInput" class="w-full h-96 p-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="<h1>Hello World</h1><p>Paste your HTML code here.</p><ul><li>Like</li><li>This</li></ul>"></textarea>
+                </div>
+                <!-- Markdown Output -->
+                <div class="bg-white dark:bg-gray-800 p-2">
+                    <label for="markdownOutput" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 pl-2">Markdown Output</label>
+                    <textarea id="markdownOutput" readonly class="w-full h-96 p-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="# Hello World&#10;&#10;Your Markdown output will appear here."></textarea>
+                </div>
+            </div>
+        </main>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed bottom-10 right-10 bg-gray-900 text-white py-3 px-6 rounded-lg shadow-lg opacity-0 transform translate-y-4 transition-all duration-300 ease-in-out">
+            Markdown copied to clipboard!
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const htmlInput = document.getElementById('htmlInput');
+            const markdownOutput = document.getElementById('markdownOutput');
+            const convertBtn = document.getElementById('convertBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const toast = document.getElementById('toast');
+
+            // Initialize Turndown service
+            const turndownService = new TurndownService({
+                headingStyle: 'atx',
+                codeBlockStyle: 'fenced'
+            });
+
+            const performConversion = () => {
+                const html = htmlInput.value;
+                try {
+                    const markdown = turndownService.turndown(html);
+                    markdownOutput.value = markdown;
+                } catch (error) {
+                    markdownOutput.value = "Error: Invalid HTML input.";
+                    console.error("Conversion Error:", error);
+                }
+            };
+            
+            convertBtn.addEventListener('click', performConversion);
+
+            // Optional: Live conversion as user types
+            // htmlInput.addEventListener('input', performConversion);
+
+            copyBtn.addEventListener('click', () => {
+                if (markdownOutput.value) {
+                    // Using a temporary textarea to copy to clipboard
+                    const tempTextArea = document.createElement('textarea');
+                    tempTextArea.value = markdownOutput.value;
+                    document.body.appendChild(tempTextArea);
+                    tempTextArea.select();
+                    try {
+                        // Use execCommand for broader browser/iframe support
+                        document.execCommand('copy');
+                        showToast();
+                    } catch (err) {
+                        console.error('Failed to copy text: ', err);
+                        // Fallback for modern browsers (might not work in all iframe contexts)
+                        navigator.clipboard.writeText(markdownOutput.value).then(showToast, (e) => console.error(e));
+                    }
+                    document.body.removeChild(tempTextArea);
+                }
+            });
+
+            clearBtn.addEventListener('click', () => {
+                htmlInput.value = '';
+                markdownOutput.value = '';
+            });
+
+            function showToast() {
+                toast.classList.remove('opacity-0', 'translate-y-4');
+                toast.classList.add('opacity-100', 'translate-y-0');
+                setTimeout(() => {
+                    toast.classList.remove('opacity-100', 'translate-y-0');
+                    toast.classList.add('opacity-0', 'translate-y-4');
+                }, 2000);
+            }
+
+            // Set placeholder content
+            htmlInput.value = `<h1>Welcome to the Converter!</h1>
+
+<p>This tool instantly converts <strong>HTML code</strong> into clean, readable <em>Markdown</em>.</p>
+
+<h2>Key Features:</h2>
+<ul>
+  <li>Easy to use</li>
+  <li>Fast and reliable</li>
+  <li>Client-side only (your data stays private)</li>
+</ul>
+
+<pre><code class="language-js">console.log("Hello, World!");
+</code></pre>
+`;
+            // Perform initial conversion on load
+            performConversion();
+        });
+    </script>
+</body>
+</html>
+
+
