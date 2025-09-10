@@ -3,10 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Instant HTML to Markdown Converter</title>
+    <title>Ultimate Markdown & HTML Converter</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tailwindcss/typography@0.5.x/dist/typography.min.css"/>
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -14,122 +17,172 @@
         textarea {
             font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
             resize: none;
+            border-width: 2px;
         }
-        .custom-shadow {
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        .source-pane {
+            border-color: #4f46e5; /* Indigo-600 */
+            box-shadow: 0 0 0 2px #a5b4fc; /* Indigo-300 */
         }
-        .btn {
-            transition: all 0.2s ease-in-out;
+        .preview-pane {
+            height: calc(100vh - 200px);
         }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        @media (max-width: 768px) {
+            .preview-pane {
+                height: 400px;
+            }
+        }
+        /* Simple toggle switch styles */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #10B981;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #10B981;
         }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
 
-    <div class="container mx-auto px-4 py-8">
+    <div class="container mx-auto px-4 py-6">
         <!-- Header -->
-        <header class="text-center mb-8">
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white">Instant HTML to Markdown Converter</h1>
-            <p class="text-lg text-gray-600 dark:text-gray-400 mt-2">Paste your HTML in the left panel, and get clean Markdown on the right.</p>
+        <header class="text-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white">Ultimate Markdown & HTML Converter</h1>
+            <p class="text-md text-gray-600 dark:text-gray-400 mt-2">A bi-directional converter with a live rendered preview.</p>
         </header>
 
-        <!-- Main Converter Section -->
-        <main class="bg-white dark:bg-gray-800 rounded-2xl custom-shadow overflow-hidden">
-            <!-- Action Buttons -->
-            <div class="flex flex-wrap justify-center items-center p-4 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-700 space-x-2 md:space-x-4">
-                <button id="convertBtn" class="btn bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-5 rounded-lg focus:outline-none focus:ring-4 focus:ring-indigo-300 dark:focus:ring-indigo-800">
-                    <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    Convert
-                </button>
-                <button id="copyBtn" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-5 rounded-lg focus:outline-none focus:ring-4 focus:ring-green-300 dark:focus:ring-green-800">
-                    <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                    Copy Markdown
-                </button>
-                <button id="clearBtn" class="btn bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-5 rounded-lg focus:outline-none focus:ring-4 focus:ring-red-300 dark:focus:ring-red-800">
-                     <svg class="w-5 h-5 inline-block mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg>
-                    Clear
-                </button>
-            </div>
-            
-            <!-- Editor Panels -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-px bg-gray-200 dark:bg-gray-700">
-                <!-- HTML Input -->
-                <div class="bg-white dark:bg-gray-800 p-2">
-                     <label for="htmlInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 pl-2">HTML Input</label>
-                    <textarea id="htmlInput" class="w-full h-96 p-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="<h1>Hello World</h1><p>Paste your HTML code here.</p><ul><li>Like</li><li>This</li></ul>"></textarea>
+        <!-- Controls -->
+        <div class="flex flex-col md:flex-row justify-center items-center gap-4 mb-4 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-md">
+            <!-- Toggle Switch -->
+            <div class="flex items-center space-x-4">
+                <span class="font-semibold text-gray-700 dark:text-gray-300">HTML to Markdown</span>
+                <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                    <input type="checkbox" name="toggle" id="directionToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                    <label for="directionToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 dark:bg-gray-600 cursor-pointer"></label>
                 </div>
-                <!-- Markdown Output -->
-                <div class="bg-white dark:bg-gray-800 p-2">
-                    <label for="markdownOutput" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 pl-2">Markdown Output</label>
-                    <textarea id="markdownOutput" readonly class="w-full h-96 p-3 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none" placeholder="# Hello World&#10;&#10;Your Markdown output will appear here."></textarea>
-                </div>
+                <span class="font-semibold text-gray-700 dark:text-gray-300">Markdown to HTML</span>
             </div>
-        </main>
-
-        <!-- Toast Notification -->
-        <div id="toast" class="fixed bottom-10 right-10 bg-gray-900 text-white py-3 px-6 rounded-lg shadow-lg opacity-0 transform translate-y-4 transition-all duration-300 ease-in-out">
-            Markdown copied to clipboard!
+             <!-- Action Buttons -->
+            <div class="flex items-center space-x-3">
+                 <button id="copyBtn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">Copy Output</button>
+                 <button id="clearBtn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-transform transform hover:scale-105">Clear All</button>
+            </div>
         </div>
 
+        <!-- Main Converter Panels -->
+        <main class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- HTML Panel -->
+            <div>
+                <label for="htmlPane" id="htmlLabel" class="block text-sm font-semibold mb-2">HTML Source</label>
+                <textarea id="htmlPane" class="w-full h-full min-h-[400px] p-3 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none transition-shadow duration-200"></textarea>
+            </div>
+            <!-- Markdown Panel -->
+            <div>
+                <label for="markdownPane" id="markdownLabel" class="block text-sm font-semibold mb-2">Markdown Output</label>
+                <textarea id="markdownPane" class="w-full h-full min-h-[400px] p-3 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none transition-shadow duration-200"></textarea>
+            </div>
+            <!-- Preview Panel -->
+            <div>
+                 <label for="previewPane" class="block text-sm font-semibold mb-2">Live Preview</label>
+                <div id="previewPane" class="prose dark:prose-invert max-w-none w-full h-full min-h-[400px] p-3 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-lg overflow-auto"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-10 right-10 bg-gray-900 text-white py-3 px-6 rounded-lg shadow-lg opacity-0 transform translate-y-4 transition-all duration-300 ease-in-out">
+        Copied to clipboard!
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const htmlInput = document.getElementById('htmlInput');
-            const markdownOutput = document.getElementById('markdownOutput');
-            const convertBtn = document.getElementById('convertBtn');
+            // DOM Elements
+            const htmlPane = document.getElementById('htmlPane');
+            const markdownPane = document.getElementById('markdownPane');
+            const previewPane = document.getElementById('previewPane');
+            const directionToggle = document.getElementById('directionToggle');
+            const htmlLabel = document.getElementById('htmlLabel');
+            const markdownLabel = document.getElementById('markdownLabel');
             const copyBtn = document.getElementById('copyBtn');
             const clearBtn = document.getElementById('clearBtn');
             const toast = document.getElementById('toast');
 
-            // Initialize Turndown service
-            const turndownService = new TurndownService({
-                headingStyle: 'atx',
-                codeBlockStyle: 'fenced'
-            });
+            // Converters
+            const turndownService = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' });
+            const showdownConverter = new showdown.Converter();
+            
+            // State
+            let mode = 'htmlToMd'; // 'htmlToMd' or 'mdToHtml'
 
-            const performConversion = () => {
-                const html = htmlInput.value;
-                try {
-                    const markdown = turndownService.turndown(html);
-                    markdownOutput.value = markdown;
-                } catch (error) {
-                    markdownOutput.value = "Error: Invalid HTML input.";
-                    console.error("Conversion Error:", error);
+            const updatePanes = () => {
+                if (mode === 'htmlToMd') {
+                    const htmlInput = htmlPane.value;
+                    try {
+                        const markdownResult = turndownService.turndown(htmlInput);
+                        markdownPane.value = markdownResult;
+                        previewPane.innerHTML = showdownConverter.makeHtml(markdownResult);
+                    } catch (e) {
+                        markdownPane.value = "Error converting HTML.";
+                    }
+                } else { // mdToHtml
+                    const markdownInput = markdownPane.value;
+                    try {
+                        const htmlResult = showdownConverter.makeHtml(markdownInput);
+                        htmlPane.value = htmlResult;
+                        previewPane.innerHTML = htmlResult;
+                    } catch (e) {
+                        htmlPane.value = "Error converting Markdown.";
+                    }
                 }
             };
             
-            convertBtn.addEventListener('click', performConversion);
+            const setMode = (newMode) => {
+                mode = newMode;
+                if (mode === 'htmlToMd') {
+                    directionToggle.checked = false;
+                    htmlPane.readOnly = false;
+                    markdownPane.readOnly = true;
+                    htmlPane.classList.add('source-pane');
+                    markdownPane.classList.remove('source-pane');
+                    htmlLabel.textContent = 'HTML Source';
+                    markdownLabel.textContent = 'Markdown Output';
+                } else { // mdToHtml
+                    directionToggle.checked = true;
+                    htmlPane.readOnly = true;
+                    markdownPane.readOnly = false;
+                    htmlPane.classList.remove('source-pane');
+                    markdownPane.classList.add('source-pane');
+                    htmlLabel.textContent = 'HTML Output';
+                    markdownLabel.textContent = 'Markdown Source';
+                }
+                updatePanes();
+            };
 
-            // Optional: Live conversion as user types
-            // htmlInput.addEventListener('input', performConversion);
+            // Event Listeners
+            directionToggle.addEventListener('change', () => {
+                setMode(directionToggle.checked ? 'mdToHtml' : 'htmlToMd');
+            });
+            
+            htmlPane.addEventListener('input', () => {
+                if (mode === 'htmlToMd') updatePanes();
+            });
+
+            markdownPane.addEventListener('input', () => {
+                if (mode === 'mdToHtml') updatePanes();
+            });
 
             copyBtn.addEventListener('click', () => {
-                if (markdownOutput.value) {
-                    // Using a temporary textarea to copy to clipboard
-                    const tempTextArea = document.createElement('textarea');
-                    tempTextArea.value = markdownOutput.value;
-                    document.body.appendChild(tempTextArea);
-                    tempTextArea.select();
-                    try {
-                        // Use execCommand for broader browser/iframe support
-                        document.execCommand('copy');
+                const outputPane = mode === 'htmlToMd' ? markdownPane : htmlPane;
+                if (outputPane.value) {
+                    navigator.clipboard.writeText(outputPane.value).then(() => {
                         showToast();
-                    } catch (err) {
-                        console.error('Failed to copy text: ', err);
-                        // Fallback for modern browsers (might not work in all iframe contexts)
-                        navigator.clipboard.writeText(markdownOutput.value).then(showToast, (e) => console.error(e));
-                    }
-                    document.body.removeChild(tempTextArea);
+                    }).catch(err => console.error('Failed to copy:', err));
                 }
             });
 
             clearBtn.addEventListener('click', () => {
-                htmlInput.value = '';
-                markdownOutput.value = '';
+                htmlPane.value = '';
+                markdownPane.value = '';
+                previewPane.innerHTML = '';
             });
 
             function showToast() {
@@ -141,23 +194,15 @@
                 }, 2000);
             }
 
-            // Set placeholder content
-            htmlInput.value = `<h1>Welcome to the Converter!</h1>
-
-<p>This tool instantly converts <strong>HTML code</strong> into clean, readable <em>Markdown</em>.</p>
-
-<h2>Key Features:</h2>
+            // Initial Setup
+            htmlPane.value = `<h1>Welcome!</h1>
+<p>This is a <strong>bi-directional</strong> converter.</p>
 <ul>
-  <li>Easy to use</li>
-  <li>Fast and reliable</li>
-  <li>Client-side only (your data stays private)</li>
-</ul>
-
-<pre><code class="language-js">console.log("Hello, World!");
-</code></pre>
-`;
-            // Perform initial conversion on load
-            performConversion();
+    <li>Use the toggle to switch directions.</li>
+    <li>Edit the source pane (in blue).</li>
+    <li>See the output and a live preview instantly!</li>
+</ul>`;
+            setMode('htmlToMd');
         });
     </script>
 </body>
