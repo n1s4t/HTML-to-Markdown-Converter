@@ -5,7 +5,7 @@ all-in-one web tool provides seamless **bi-directional conversion**
 between HTML and Markdown, complete with a **live rendered preview**.
 Built for speed, privacy, and a superior user experience.
 
-### [**[➡️ Try the Live Tool Here ⬅️]{.underline}**](https://www.google.com/search?q=https://n1s4t.github.io/ultimate-converter/)
+### [**[➡️ Try the Live Tool Here ⬅️]**](https://www.google.com/search?q=https://n1s4t.github.io/ultimate-converter/)
 
 *(Note: The live demo requires you to set up GitHub Pages. See the
 deployment guide below.)*
